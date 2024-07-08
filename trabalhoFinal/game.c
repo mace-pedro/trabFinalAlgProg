@@ -57,35 +57,55 @@ int shoot(int proj[4][3], int direction, int player[2]){ //funcao do tiro do pro
             }
 }
 
-int moveEnemyToBase(int enemy[3][10], int base[3], int j, int b){ //funcao que move o inimigo em direcao a base
+int moveEnemyToBase(int enemy[3][10], int base[3], int j, int b, int matriz[30][60]){ //funcao que move o inimigo em direcao a base
 
-    if(enemy[1][j] - base[1] >= 0 && b % 32 == 0){ //se o inimigo est· a direita da base
-        enemy[1][j] = enemy[1][j] - 1;
+    if(enemy[1][j] - base[1] >= 0 && b % 32 == 0 && matriz[enemy[2][j]][enemy[1][j]-1] != 'W' && matriz[enemy[2][j]][enemy[1][j]-1] != 'm'){ //se o inimigo est√° a direita da base
+        matriz[enemy[2][j]][enemy[1][j]-1] = 'm';
+        matriz[enemy[2][j]][enemy[1][j]] = ' ';
+        enemy[1][j] = enemy[1][j] - 1; //vai pra esquerda
     }
-    if(enemy[1][j] - base[1] < 0 && b % 32 == 0){ //se o inimigo est· a esquerda da base
-        enemy[1][j] = enemy[1][j] + 1;
+    if(enemy[1][j] - base[1] < 0 && b % 32 == 0 && matriz[enemy[2][j]][enemy[1][j]+1] != 'W' && matriz[enemy[2][j]][enemy[1][j]+1] != 'm'){ //se o inimigo est√° a esquerda da base
+        matriz[enemy[2][j]][enemy[1][j]+1] = 'm';
+        matriz[enemy[2][j]][enemy[1][j]] = ' ';
+        enemy[1][j] = enemy[1][j] + 1; //vai pra direita
     }
-    if(enemy[2][j] - base[2] >= 0 && b % 32 !=0){ //se o inimigo est· acima da base
-        enemy[2][j] = enemy[2][j] - 1;
+    if(enemy[2][j] - base[2] >= 0 && b % 32 !=0 && matriz[enemy[2][j]-1][enemy[1][j]] != 'W' && matriz[enemy[2][j]-1][enemy[1][j]] != 'm'){ //se o inimigo est√° acima da base
+        matriz[enemy[2][j]-1][enemy[1][j]] = 'm';
+        matriz[enemy[2][j]][enemy[1][j]] = ' ';
+        enemy[2][j] = enemy[2][j] - 1; //vai pra cima
     }
-    if(enemy[2][j] - base[2] < 0 && b % 32 !=0){ //se o inimigo est· abaixo da base
-        enemy[2][j] = enemy[2][j] + 1;
+    if(enemy[2][j] - base[2] < 0 && b % 32 !=0 && matriz[enemy[2][j]+1][enemy[1][j]] != 'W' && matriz[enemy[2][j]+1][enemy[1][j]] != 'm'){ //se o inimigo est√° abaixo da base
+        matriz[enemy[2][j]+1][enemy[1][j]] = 'm';
+        matriz[enemy[2][j]][enemy[1][j]] = ' ';
+        enemy[2][j] = enemy[2][j] + 1; //vai pra baixo
     }//os ticks foram setados para que a cada 32 ticks, em 16 o inimigo vai para a base pelo caminho horizontal, e depois pelo caminho vertical, intercalando
 }
 
-int moveEnemyRandomly(int enemy[3][10], int base[3], int j, int a){ //funcao que move o inimigo em direcoes aleatorias
+int moveEnemyRandomly(int enemy[3][10], int base[3], int j, int a, int matriz[30][60]){ //funcao que move o inimigo em direcoes aleatorias
     switch(a){
     case 0:
-        enemy[1][j] = enemy[1][j] + 1;
+        if (matriz[enemy[2][j]][enemy[1][j]+1] != 'W' && matriz[enemy[2][j]][enemy[1][j]+1] != 'm'){ //se o ponto a direita do inimigo for uma parede, ele nao faz o movimento
+        matriz[enemy[2][j]][enemy[1][j]+1] = 'm';
+        matriz[enemy[2][j]][enemy[1][j]] = ' ';
+        enemy[1][j] = enemy[1][j] + 1;} //vai pra direita
         break;
     case 1:
-        enemy[2][j] = enemy[2][j] + 1;
+        if (matriz[enemy[2][j]+1][enemy[1][j]] != 'W' && matriz[enemy[2][j]+1][enemy[1][j]] != 'm'){ //se o ponto acima do inimigo for uma parede, ele nao faz o movimento
+        matriz[enemy[2][j]+1][enemy[1][j]] = 'm';
+        matriz[enemy[2][j]][enemy[1][j]] = ' ';
+        enemy[2][j] = enemy[2][j] + 1;} //vai pra baixo
         break;
     case 2:
-        enemy[1][j] = enemy[1][j] - 1;
+        if (matriz[enemy[2][j]][enemy[1][j]-1] != 'W' && matriz[enemy[2][j]][enemy[1][j]-1] != 'm'){ //se o ponto a esquerda do inimigo for uma parede, ele nao faz o movimento
+        matriz[enemy[2][j]][enemy[1][j]-1] = 'm';
+        matriz[enemy[2][j]][enemy[1][j]] = ' ';
+        enemy[1][j] = enemy[1][j] - 1;} //vai pra esquerda
         break;
     case 3:
-        enemy[2][j] = enemy[2][j] - 1;
+        if (matriz[enemy[2][j]-1][enemy[1][j]] != 'W' && matriz[enemy[2][j]-1][enemy[1][j]] != 'm'){ //se o ponto abaixo do inimigo for uma parede, ele nao faz o movimento
+        matriz[enemy[2][j]-1][enemy[1][j]] = 'm';
+        matriz[enemy[2][j]][enemy[1][j]] = ' ';
+        enemy[2][j] = enemy[2][j] - 1;} //vai pra cima
         break;
     }
 }
@@ -97,8 +117,16 @@ int clearShot(int proj[4][3], int i){ //funcao que limpa o tiro do mapa
     proj[3][i] = 0;
 }
 
-int clearEnemy(int enemy[3][10], int j){ //funcao que limpa o inimigo do mapa
+int clearEnemy(int enemy[3][10], int j, int matriz[30][60]){ //funcao que limpa o inimigo do mapa quando ele morre
     enemy[0][j] = 0;
+    matriz[enemy[2][j]][enemy[1][j]] = ' ';
+    enemy[1][j] = -1;
+    enemy[2][j] = -1;
+}
+
+int enemyBase(int enemy[3][10], int j, int matriz[30][60]){ //funcao que limpa o inimigo do mapa quando ele toca a base
+    enemy[0][j] = 0;
+    matriz[enemy[2][j]][enemy[1][j]] = 's';
     enemy[1][j] = -1;
     enemy[2][j] = -1;
 }
@@ -160,6 +188,37 @@ int main(void){
 
     while (!WindowShouldClose()){
 
+        //checagem inicial para a vida da base
+        switch(base[0]){
+        case 0:
+            CloseWindow();
+            break;
+        case 50:
+            DrawRectangle(base[1]*20, base[2]*20, 20, 20, ORANGE);
+            break;
+        case 100:
+            DrawRectangle(base[1]*20, base[2]*20, 20, 20, GREEN);
+            break;
+        }
+
+        b= b+1; //a variavel B funciona como especie de 'tick' do jogo. a cada n ticks, alguma coisa acontece
+        for(j=0; j<10; j++){ //esse for √© o comportamento do inimigo, como movimento e quando se encontra com um elemento
+            a = rand() % 4;
+            if(enemy[0][j] == 1 && b %8 == 0 && b %16 != 0){
+                moveEnemyRandomly(enemy, base, j, a, matriz);
+            }
+            if(enemy[0][j] == 1 && b %16 == 0){
+                moveEnemyToBase(enemy, base, j, b, matriz);
+            }
+            if(enemy[1][j] == base[1] && enemy[2][j] == base[2]){
+                enemyBase(enemy, j, matriz); //quando o inimigo chega na base, o inimigo morre, mas a base perde 50 de vida
+                base[0] = base[0] - 50;
+            }
+            if(enemy[1][j] == player[0] && enemy[2][j] == player[1]){ //se o inimigo toca o jogador, o jogador morre e o jogo acaba
+                CloseWindow();
+            }
+        }
+
         //movimentacao do jogador
         if (IsKeyDown(KEY_D)){
             if(matriz[y][x+1] != 'W'){
@@ -207,29 +266,18 @@ int main(void){
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        b= b+1; //a variavel B funciona como especie de 'tick' do jogo. a cada n ticks, alguma coisa acontece
-        for(j=0; j<10; j++){ //base[1] base[2]
-            a = rand() % 4;
-            if(enemy[0][j] == 1 && b %8 == 0){
-                moveEnemyRandomly(enemy, base, j, a);
-            }
-            if(enemy[0][j] == 1 && b %16 == 0){
-                moveEnemyToBase(enemy, base, j, b);
-            }
-        }
-
         for(i = 0; i<30; i++){
             for(j=0; j<60; j++){
                 switch(matriz[i][j]){ //as coordenadas tem q sempre multiplicar por 20, porque sao em pixel
                     case 'j':
-                        DrawRectangle(player[0]*20, player[1]*20, 20, 20, ORANGE);
+                        DrawRectangle(player[0]*20, player[1]*20, 20, 20, SKYBLUE);
                         break;
                     case 'W':
                         DrawRectangle(j*20, i*20, 20, 20, DARKGRAY);
                         break;
-                    case 's':
-                        DrawRectangle(j*20, i*20, 20, 20, GREEN);
-                        break;
+                    //case 's':
+                    //    DrawRectangle(j*20, i*20, 20, 20, GREEN);
+                    //    break;
                     //case 'm':
                     //    DrawRectangle(j*20, i*20, 20, 20, RED);
                     //    break;
@@ -262,15 +310,15 @@ int main(void){
                 clearShot(proj, i);
             }
 
-            for(j=0; j<10; j++){ //base[1] base[2]
+            for(j=0; j<10; j++){ //comportamento de cada projetil em contato com inimigo
                 if(proj[1][i] == enemy[1][j] && proj[2][i] == enemy[2][j]){ //se o projetil acertar o inimigo, o projetil e o inimigo somem
                     clearShot(proj, i);
-                    clearEnemy(enemy, j);
+                    clearEnemy(enemy, j, matriz);
                 }
             }
 
 
-            if (proj[0][i] == 1 && proj[1][i] < COLUNA && proj[1][i] >=0 && proj[2][i] <LINHA && proj[2][i] >=0){ //se o projetil existe e est· dentro dos limites do jogo, ele devera ser desenhado
+            if (proj[0][i] == 1 && proj[1][i] < COLUNA && proj[1][i] >=0 && proj[2][i] <LINHA && proj[2][i] >=0){ //se o projetil existe e est√° dentro dos limites do jogo, ele devera ser desenhado
                 DrawRectangle(proj[1][i]*20, proj[2][i]*20, 20, 20, DARKBLUE);
             }
 
