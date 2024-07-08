@@ -133,7 +133,7 @@ int enemyBase(int enemy[3][10], int j, int matriz[30][60]){ //funcao que limpa o
 
 int main(void){
 
-    int x, y, direction, i, j, posInitX, posInitY, posX, posY, numEnemy, a, b;
+    int x, y, direction, i, j, posInitX, posInitY, posX, posY, numEnemy, a, b, d;
     int proj[4][3]; //matriz posicao dos projeteis
     int matriz[30][60]; //matriz mapa
     int player[2]; // posicao do jogador
@@ -142,8 +142,8 @@ int main(void){
     char c; //char usado para armazenar a info do mapa no ponto (x,y) no mapa e inserir na matriz[b][a]
     srand(time(NULL));
 
-    numEnemy = 0;
-    b = 0;
+    b = 0;        //ticks
+    d = 0;        //variavel para auxiliar na contagem de inimigos
 
     FILE *mapa;
     mapa = fopen("mapa1.txt", "r");
@@ -157,34 +157,39 @@ int main(void){
             matriz[i][j] = c;
         }
     }
+    //listando os elementos do mapa e alocando eles
+    for (i = 0; i<30; i++){
+    for (j=0; j<60; j++){
+        switch(matriz[i][j]){
+        case 'j':
+            player[0] = j; //coordenada X do jogador
+            player[1] = i; //coordenada Y do jogador
+            x = j; //ponteiros para X e Y
+            y = i;
+            break;
+        case 'm':
+            enemy[0][d] = 1;
+            enemy[1][d] = j; //coordenada x do inimigo
+            enemy[2][d] = i; //coordenada y do inimigo
+            d = d+1;
+            break;
+        case 's':
+            base[0] = 100; //vida
+            base[1] = j; //coordenada x da base
+            base[2] = i; //coordenada y da base
+            }
+        }
+    }
+
+    for(j = 0; j<10; j++){
+    }
 
     direction = 0;
 
     InitWindow(LARGURA, ALTURA, "Game");
     SetTargetFPS(30);
 
-    for (i = 0; i<30; i++){
-        for (j=0; j<60; j++){
-            switch(matriz[i][j]){
-            case 'j':
-                player[0] = j; //coordenada X do jogador
-                player[1] = i; //coordenada Y do jogador
-                x = j; //ponteiros para X e Y
-                y = i;
-                break;
-            case 'm':
-                enemy[0][numEnemy] = 1;
-                enemy[1][numEnemy] = j; //coordenada x do inimigo
-                enemy[2][numEnemy] = i; //coordenada y do inimigo
-                numEnemy = numEnemy+1;
-                break;
-            case 's':
-                base[0] = 100; //vida
-                base[1] = j; //coordenada x da base
-                base[2] = i; //coordenada y da base
-            }
-        }
-    }
+
 
     while (!WindowShouldClose()){
 
@@ -201,9 +206,14 @@ int main(void){
             break;
         }
 
-        b= b+1; //a variavel B funciona como especie de 'tick' do jogo. a cada n ticks, alguma coisa acontece
+        numEnemy = 0; //numero de inimigos vivos
+        b= b+1;
         for(j=0; j<10; j++){ //esse for é o comportamento do inimigo, como movimento e quando se encontra com um elemento
             a = rand() % 4;
+            if(enemy[0][j] != 1){enemy[0][j] = 0;} //se o inimigo nao estiver vivo, ele vai estar morto (antes nao tinha sido declarado)
+
+            numEnemy = numEnemy + enemy[0][j]; //numero de inimigo aumenta quando o codigo ler q tem um inimigo vivo
+
             if(enemy[0][j] == 1 && b %8 == 0 && b %16 != 0){
                 moveEnemyRandomly(enemy, base, j, a, matriz);
             }
@@ -217,6 +227,11 @@ int main(void){
             if(enemy[1][j] == player[0] && enemy[2][j] == player[1]){ //se o inimigo toca o jogador, o jogador morre e o jogo acaba
                 CloseWindow();
             }
+        }
+
+        if (numEnemy <= 0){
+            printf("Voce passou de fase!\n");
+            //CloseWindow();
         }
 
         //movimentacao do jogador
@@ -264,9 +279,9 @@ int main(void){
         }
 
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BLACK);
 
-        for(i = 0; i<30; i++){
+        for(i = 0; i<30; i++){ //desenho do jogador e das paredes
             for(j=0; j<60; j++){
                 switch(matriz[i][j]){ //as coordenadas tem q sempre multiplicar por 20, porque sao em pixel
                     case 'j':
@@ -285,7 +300,7 @@ int main(void){
             }
         }
 
-        if(player[0] < 0 || player[0]>= COLUNA || player[1]<0 || player[1]>=LINHA){
+        if(player[0] < 0 || player[0]>= COLUNA || player[1]<0 || player[1]>=LINHA){ //se o jogador sair do mapa, o jogo fecha
             CloseWindow();
         }
 
