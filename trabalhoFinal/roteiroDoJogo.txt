@@ -1,0 +1,16 @@
+O jogo é um modelo de tower defense que consiste em um mapa fechado com paredes, inimigos que tentarão atacar sua base
+voce tem uma arma que atira 3 projeteis no mapa (é possível atirar novamente quando o projetil some)
+
+Jogador:
+quando o jogador encontra com um inimigo é fim de jogo.
+o jogador não passa por paredes
+o jogador possui uma arma que atira 3 projeteis
+
+Inimigo:
+o inimigo tem dificuldades
+o movimento tem duas formas:
+-movimento direcionado para a base
+-movimento aleatório
+a dificuldade balanceia a taxa (movimentos serios)/(movimentos aleatórios)
+o movimento é feito em ticks do jogo
+
